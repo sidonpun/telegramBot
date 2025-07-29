@@ -1,4 +1,6 @@
 import os
+import json
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,6 +21,13 @@ from functools import partial
 
 LOADER_URL = "http://desync.pro:5000/home/download_packed"
 
+FAQ_DIR = Path(__file__).resolve().parent / "faq"
+FAQ_TITLES_FILE = FAQ_DIR / "faq_titles.json"
+FAQ_LINKS_FILE = FAQ_DIR / "faq_links.json"
+
+FAQ_TITLES = None
+FAQ_LINKS = None
+
 user_game_selection = {}
 
 
@@ -28,6 +37,22 @@ def escape_markdown(text: str) -> str:
 
 def get_lang(user_id):
     return user_languages.get(user_id, "en")
+
+
+def get_faq_titles():
+    global FAQ_TITLES
+    if FAQ_TITLES is None:
+        with open(FAQ_TITLES_FILE, encoding="utf-8") as f:
+            FAQ_TITLES = json.load(f)
+    return FAQ_TITLES
+
+
+def get_faq_links():
+    global FAQ_LINKS
+    if FAQ_LINKS is None:
+        with open(FAQ_LINKS_FILE, encoding="utf-8") as f:
+            FAQ_LINKS = json.load(f)
+    return FAQ_LINKS
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(translations["start"]["en"], reply_markup=ask_language())
@@ -104,162 +129,24 @@ async def show_faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     lang = get_lang(query.from_user.id)
-    faq_titles = {
-        "faq_1": {
-            "en": "What to do after purchase?",
-            "ru": "Что делать после покупки?",
-            "zh": "购买后该怎么办？",
-            "ko": "구매 후 무엇을 해야 하나요?",
-            "tr": "Satın aldıktan sonra ne yapmalıyım?",
-            "ja": "購入後はどうすればいいですか？",
-        },
-        "faq_2": {
-            "en": "Secure boot & UEFI",
-            "ru": "Secure boot & UEFI",
-            "zh": "Secure boot 与 UEFI",
-            "ko": "Secure boot & UEFI",
-            "tr": "Secure boot & UEFI",
-            "ja": "Secure boot と UEFI",
-        },
-        "faq_3": {
-            "en": "Additional loader settings",
-            "ru": "Дополнительные настройки лоадера",
-            "zh": "Loader 的其他设置",
-            "ko": "로더 추가 설정",
-            "tr": "Loader ek ayarlar",
-            "ja": "ローダーの追加設定",
-        },
-        "faq_4": {
-            "en": "Bought cheat elsewhere, help",
-            "ru": "Купил чит в другом месте, помогите",
-            "zh": "在别处买了外挂，帮帮我",
-            "ko": "다른 곳에서 핵을 샀습니다. 도와주세요",
-            "tr": "Hileyi başka yerde aldım, yardım edin",
-            "ja": "他でチートを買いました。助けて",
-        },
-        "faq_5": {
-            "en": "Antivirus / anticheat settings",
-            "ru": "Antivirus / anticheat settings",
-            "zh": "杀毒 / 反作弊设置",
-            "ko": "백신/안티치트 설정",
-            "tr": "Antivirus/anticheat ayarları",
-            "ja": "アンチウイルス/アンチチート設定",
-        },
-        "faq_6": {
-            "en": "Problem with cheat or launch, what to do?",
-            "ru": "Проблема с читом / запуском, что делать?",
-            "zh": "外挂/启动问题怎么办？",
-            "ko": "핵/실행 문제, 어떻게 해야 하나요?",
-            "tr": "Hile/başlatma sorunu, ne yapmalıyım?",
-            "ja": "チート/起動の問題、どうすれば？",
-        },
-        "faq_7": {
-            "en": "24h bans PUBG",
-            "ru": "24h bans PUBG",
-            "zh": "24小时封禁 PUBG",
-            "ko": "PUBG 24시간 정지",
-            "tr": "PUBG 24 saat ban",
-            "ja": "PUBGの24時間BAN",
-        },
-        "faq_8": {
-            "en": "Sorry, this application cannot run under Virtual Machine",
-            "ru": "Sorry, this application cannot run under Virtual Machine",
-            "zh": "抱歉，此应用无法在虚拟机中运行",
-            "ko": "죄송합니다. 이 프로그램은 가상 머신에서 실행될 수 없습니다",
-            "tr": "Üzgünüz, bu uygulama sanal makinede çalışamaz",
-            "ja": "申し訳ありませんが、このアプリは仮想マシンでは実行できません",
-        },
-        "faq_9": {
-            "en": "ASLR windows defender",
-            "ru": "ASLR windows defender",
-            "zh": "ASLR windows defender",
-            "ko": "ASLR windows defender",
-            "tr": "ASLR windows defender",
-            "ja": "ASLR windows defender",
-        },
-        "faq_10": {
-            "en": "Payment questions",
-            "ru": "Вопросы по оплате",
-            "zh": "支付问题",
-            "ko": "결제 관련 질문",
-            "tr": "Ödeme soruları",
-            "ja": "支払いに関する質問",
-        },
-        "faq_11": {
-            "en": "Are there any discounts or coupons?",
-            "ru": "Есть ли какие-то скидки / купоны?",
-            "zh": "有折扣/优惠券吗？",
-            "ko": "할인이나 쿠폰이 있나요?",
-            "tr": "Herhangi bir indirim veya kupon var mı?",
-            "ja": "割引やクーポンはありますか？",
-        },
-        "faq_12": {
-            "en": "Where to get cryptocurrency",
-            "ru": "Где взять криптовалюту",
-            "zh": "哪里获取加密货币",
-            "ko": "암호화폐는 어디서 구하나요?",
-            "tr": "Kripto para nereden alabilirim",
-            "ja": "暗号通貨はどこで入手できますか",
-        },
-        "faq_13": {
-            "en": "Subscription freezing",
-            "ru": "Заморозка подписки",
-            "zh": "暂停订阅",
-            "ko": "구독 일시 정지",
-            "tr": "Aboneliği dondurma",
-            "ja": "サブスクリプションの凍結",
-        },
-        "faq_14": {
-            "en": "Subscription transfer",
-            "ru": "Перенос подписки",
-            "zh": "转移订阅",
-            "ko": "구독 이전",
-            "tr": "Aboneliği taşıma",
-            "ja": "サブスクリプションの移行",
-        },
-        "faq_15": {
-            "en": "When will the cheat be updated?",
-            "ru": "Когда обновят чит?",
-            "zh": "什么时候更新外挂？",
-            "ko": "핵은 언제 업데이트되나요?",
-            "tr": "Hile ne zaman güncellenecek?",
-            "ja": "チートはいつ更新されますか？",
-        },
-        "faq_16": {
-            "en": "How to enable spoofer?",
-            "ru": "Как включить спуфер?",
-            "zh": "如何开启欺骗器?",
-            "ko": "스푸퍼를 켜려면?",
-            "tr": "Spoofer nasıl açılır?",
-            "ja": "スプーファーを有効にするには？",
-        },
-    }
-    keyboard = [[InlineKeyboardButton(title[lang], callback_data=faq_id)] for faq_id, title in faq_titles.items()]
-    keyboard.append([InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")])
-    await query.edit_message_text("❓ " + translations["menu_faq"][lang], reply_markup=InlineKeyboardMarkup(keyboard))
+    faq_titles = get_faq_titles()
+    keyboard = [
+        [InlineKeyboardButton(title[lang], callback_data=faq_id)]
+        for faq_id, title in faq_titles.items()
+    ]
+    keyboard.append(
+        [InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")]
+    )
+    await query.edit_message_text(
+        "❓ " + translations["menu_faq"][lang],
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
 
 async def send_faq_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     lang = get_lang(query.from_user.id)
-    faq_links = {
-        "faq_1": "https://docs.google.com/document/d/1MfuO-0WRbwu6gXjv2VKfuZPU294_bEOeSczHQMWvtQI/edit?tab=t.0#heading=h.jpyqgkmaltcj",
-        "faq_2": "https://docs.google.com/document/d/1gMyIKqeMjLwlnmtfeW3u9d7holGtamNAmtkSGmLXvPk/edit?tab=t.0#heading=h.lr6zthfd0myp",
-        "faq_3": "https://docs.google.com/document/d/1zJkuqf6WRJsbhDw2pcuyo9qvFHL7qccRjTZu16_eO_U/edit?tab=t.0#heading=h.f14wq4uqpmlu",
-        "faq_4": "https://docs.google.com/document/d/1Rh-7X6hl_qSEWLnMe0k1JZ0BRdhiGB74oFvml9xbOxM/edit?tab=t.0#heading=h.sxeylmtoyft",
-        "faq_5": "https://docs.google.com/document/d/1P4H4KNaW3cTZM-COkU1Q673jDxIB-zSFtDAuNw7pV_8/edit?tab=t.0#heading=h.snl0ea7h39p9",
-        "faq_6": "https://docs.google.com/document/d/1pj1ttxVbPbBwmv9ngmvL84YEP04QtgYhyPau_sZSEPk/edit?tab=t.0#heading=h.34jmecbadn9c",
-        "faq_7": "https://docs.google.com/document/d/174uELSHPfE5n2ZBQSp6QRtEMs1l3XAxKZY2FqXJVAZQ/edit?tab=t.0#heading=h.n3aovjwsw5s2",
-        "faq_8": "https://docs.google.com/document/d/1aJd6RNmjpJeTdOqEiVPyJk8H6g9gCFACpwUszdWsEgU/edit?tab=t.0",
-        "faq_9": "https://docs.google.com/document/d/1ygELrYJPOtRkRMLV_OPS8NOqw28LhlOWRB3pNDyXGwE/edit?tab=t.0#heading=h.s7qc8wtl3l0q",
-        "faq_10": "https://docs.google.com/document/d/1xdg75FQQazrgSa563Fadzp9lNLdcQUpFsK2rvSAnJKA/edit?tab=t.0#heading=h.mmu7ffux95z7",
-        "faq_11": "https://docs.google.com/document/d/147zpS3DUUKZAwO8K18bn-sxGjjlKzLl_CLH-1tnohKw/edit?tab=t.0",
-        "faq_12": "https://docs.google.com/document/d/13nTn03ziGMq-UDOtUhV0EpMIn8-s_AIOYeYCS2-HCPE/edit?tab=t.0#heading=h.lhjokw49jht7",
-        "faq_13": "https://docs.google.com/document/d/11Hqj9LICiwNF7I6CreuB2PPB5fNUYzkLIWayH6z6Vfs/edit?tab=t.0#heading=h.abdlztxcnvgy",
-        "faq_14": "https://docs.google.com/document/d/11bYA17l0Ed74a23d6-8BKYJ0lwLPKvP8QVFp-ePO0tA/edit?tab=t.0#heading=h.706a7uunpv3d",
-        "faq_15": "https://docs.google.com/document/d/19yWs7tvSwmmk9Tm9dA8Y0Hr7Y-1_vR28_oYmilHcfe4/edit?tab=t.0#heading=h.b57i0xsait03",
-        "faq_16": "https://docs.google.com/document/d/1KAwkU2oy9PS04zgn96Oe4jOIM8-uiLns7_BSQ_SwQCE/edit?tab=t.0#heading=h.yqdxjguk2tpn",
-    }
+    faq_links = get_faq_links()
     doc_url = faq_links.get(query.data)
     if doc_url:
         await query.edit_message_text(f"📄 {doc_url}", reply_markup=back_to_main_button(lang))

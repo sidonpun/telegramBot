@@ -51,3 +51,16 @@ def test_spoofer_in_games():
     assert 'spoofer' in main.games
     game = main.games['spoofer']
     assert game['durations'] == ['7', '30']
+
+
+def test_faq_titles_loaded():
+    titles = main.get_faq_titles()
+    assert isinstance(titles, dict)
+    assert 'faq_1' in titles
+    assert titles['faq_1']['en'] == 'What to do after purchase?'
+
+
+def test_faq_links_loaded():
+    links = main.get_faq_links()
+    assert 'faq_1' in links
+    assert links['faq_1'].startswith('https://')
