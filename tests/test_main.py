@@ -51,3 +51,8 @@ def test_spoofer_in_games():
     assert 'spoofer' in main.games
     game = main.games['spoofer']
     assert game['durations'] == ['7', '30']
+
+
+def test_duration_label_russian():
+    assert main.duration_label('1', 'ru') == '1 день'
+    assert main.duration_label('7', 'ru') == '7 дней'

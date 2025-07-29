@@ -26,6 +26,13 @@ def escape_markdown(text: str) -> str:
     """Escape characters that have special meaning in Markdown."""
     return text.replace("_", "\\_")
 
+
+def duration_label(days: str, lang: str) -> str:
+    """Return label for subscription duration in the given language."""
+    key = "day" if days == "1" else "days"
+    word = translations[key][lang]
+    return f"{days} {word}"
+
 def get_lang(user_id):
     return user_languages.get(user_id, "en")
 
@@ -62,7 +69,7 @@ async def game_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     game = games[gid]
     keyboard = []
     for d in game["durations"]:
-        label = f"{d} day" if d == "1" else f"{d} days"
+        label = duration_label(d, lang)
         keyboard.append([InlineKeyboardButton(label, callback_data=f"sub_{d}")])
     keyboard.append([InlineKeyboardButton(translations["menu_instruction"][lang], callback_data="guide")])
     keyboard.append([InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")])
