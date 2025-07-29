@@ -88,7 +88,7 @@ async def guide_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = get_lang(uid)
     gid = user_game_selection.get(uid)
     url = games[gid]["guide"]
-    text = f"{translations['menu_instruction'][lang]}\n{url}"
+    text = f"{translations['menu_instruction'][lang]}\n{escape_markdown(url)}"
     await query.edit_message_text(text, parse_mode="Markdown", reply_markup=back_to_main_button(lang))
 
 async def send_loader_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
