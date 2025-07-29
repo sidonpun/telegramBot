@@ -17,12 +17,12 @@ translations = {
         "ja": "✅ 言語は日本語に設定されました。"
     },
     "choose_game": {
-        "en": "🎮 Choose a game:",
-        "ru": "🎮 Выберите игру:",
-        "zh": "🎮 选择一个游戏：",
-        "ko": "🎮 게임을 선택하세요:",
-        "tr": "🎮 Bir oyun seçin:",
-        "ja": "🎮 ゲームを選んでください："
+        "en": "🎮 Choose a product:",
+        "ru": "🎮 Выберите продукт:",
+        "zh": "🎮 选择一个产品：",
+        "ko": "🎮 제품을 선택하세요:",
+        "tr": "🎮 Bir ürün seçin:",
+        "ja": "🎮 製品を選んでください："
     },
     "choose_subscription": {
         "en": "⏳ Choose subscription duration:",
@@ -97,12 +97,12 @@ translations = {
         "ja": "🌐 ウェブサイト"
     },
     "menu_game": {
-        "en": "🎮 Choose game",
-        "ru": "🎮 Выбрать игру",
-        "zh": "🎮 选择游戏",
-        "ko": "🎮 게임 선택",
-        "tr": "🎮 Oyun seç",
-        "ja": "🎮 ゲームを選択"
+        "en": "🎮 Choose product",
+        "ru": "🎮 Выбрать продукт",
+        "zh": "🎮 选择产品",
+        "ko": "🎮 제품 선택",
+        "tr": "🎮 Ürün seç",
+        "ja": "🎮 製品を選択"
     },
     "menu_loader": {
         "en": "⬇️ Download loader",

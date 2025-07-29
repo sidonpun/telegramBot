@@ -60,7 +60,10 @@ async def game_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     gid = query.data.split("_")[1]
     user_game_selection[uid] = gid
     game = games[gid]
-    keyboard = [[InlineKeyboardButton(f"{d} days", callback_data=f"sub_{d}")] for d in game["durations"]]
+    keyboard = []
+    for d in game["durations"]:
+        label = f"{d} day" if d == "1" else f"{d} days"
+        keyboard.append([InlineKeyboardButton(label, callback_data=f"sub_{d}")])
     keyboard.append([InlineKeyboardButton(translations["menu_instruction"][lang], callback_data="guide")])
     keyboard.append([InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")])
     await query.edit_message_text(translations["choose_subscription"][lang], reply_markup=InlineKeyboardMarkup(keyboard))
