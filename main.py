@@ -17,6 +17,8 @@ from games import games
 from language import ask_language, handle_language_selection, user_languages
 from functools import partial
 
+LOADER_URL = "http://desync.pro:5000/home/download_packed"
+
 user_game_selection = {}
 
 def get_lang(user_id):
@@ -29,7 +31,7 @@ async def show_main_menu(target, lang):
     keyboard = [
         [InlineKeyboardButton(translations["menu_website"][lang], url="https://desync.pro/")],
         [InlineKeyboardButton(translations["menu_game"][lang], callback_data="menu_choose_game")],
-        [InlineKeyboardButton(translations["menu_loader"][lang], url="http://desync.pro:5000/home/download_packed")],
+        [InlineKeyboardButton(translations["menu_loader"][lang], callback_data="download_loader")],
         [InlineKeyboardButton(translations["menu_status"][lang], url="https://desync.pro/statuses")],
         [InlineKeyboardButton(translations["menu_faq"][lang], callback_data="faq")],
         [InlineKeyboardButton(translations["menu_support"][lang], callback_data="support")],
@@ -44,6 +46,8 @@ async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = get_lang(uid)
     if query.data == "menu_choose_game":
         await show_games(query.message, uid)
+    elif query.data == "download_loader":
+        await send_loader_info(query.message, lang)
 
 async def game_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -80,6 +84,12 @@ async def guide_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = games[gid]["guide"]
     text = f"{translations['menu_instruction'][lang]}\n{url}"
     await query.edit_message_text(text, parse_mode="Markdown", reply_markup=back_to_main_button(lang))
+
+async def send_loader_info(message, lang):
+    await message.reply_text(
+        translations["loader_password"][lang].format(url=LOADER_URL),
+        parse_mode="Markdown",
+    )
 
 async def show_faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -173,6 +183,7 @@ def main():
     app.add_handler(CallbackQueryHandler(show_faq, pattern="^faq$"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="^back_to_main$"))
     app.add_handler(CallbackQueryHandler(support_handler, pattern="^support$"))
+    app.add_handler(CallbackQueryHandler(send_loader_info, pattern="^download_loader$"))
     app.add_handler(CallbackQueryHandler(change_language, pattern="^change_language$"))
     app.run_polling()
 
