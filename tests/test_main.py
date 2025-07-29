@@ -33,3 +33,9 @@ def test_get_lang_default_english():
 def test_get_lang_after_selection(monkeypatch):
     monkeypatch.setitem(main.user_languages, 123, 'ru')
     assert main.get_lang(123) == 'ru'
+
+
+def test_loader_password_contains_url():
+    for lang in ('en', 'ru', 'zh', 'ko', 'tr', 'ja'):
+        text = main.translations['loader_password'][lang].format(url=main.LOADER_URL)
+        assert main.LOADER_URL in text
