@@ -32,6 +32,22 @@ translations = {
         "tr": "⏳ Abonelik süresini seçin:",
         "ja": "⏳ サブスクリプション期間を選んでください："
     },
+    "day": {
+        "en": "day",
+        "ru": "день",
+        "zh": "天",
+        "ko": "일",
+        "tr": "gün",
+        "ja": "日"
+    },
+    "days": {
+        "en": "days",
+        "ru": "дней",
+        "zh": "天",
+        "ko": "일",
+        "tr": "gün",
+        "ja": "日"
+    },
     "subscription_result": {
         "en": """✅ You selected *{title}* for *{days} days*.
 
