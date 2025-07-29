@@ -1,7 +1,14 @@
+import os
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from config import BOT_TOKEN as TOKEN, SUPPORT_CONTACTS
+from telegram.ext import (
+    Application,
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+)
+
+from config import SUPPORT_CONTACTS
 from translations import translations
 from games import games
 from language import ask_language, handle_language_selection, user_languages
@@ -148,7 +155,11 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(translations["start"]["en"], reply_markup=ask_language())
 
 def main():
-    app = Application.builder().token(TOKEN).build()
+    token = os.getenv("BOT_TOKEN")
+    if not token:
+        raise RuntimeError("BOT_TOKEN environment variable is not set")
+
+    app = Application.builder().token(token).build()
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CallbackQueryHandler(partial(handle_language_selection, show_main_menu_fn=show_main_menu), pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(menu_handler, pattern="^menu_"))
