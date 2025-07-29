@@ -1,7 +1,7 @@
-# config.py
+"""Configuration for the Telegram bot."""
 
 SUPPORT_CONTACTS = [
     "@white_listed",
     "@blacklist3d3",
-    "@Desync_tech"
+    "@Desync_tech",
 ]
