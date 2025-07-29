@@ -1,9 +1,9 @@
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from translations import translations
 
 user_languages = {}
+
 
 def ask_language():
     keyboard = [
@@ -16,7 +16,10 @@ def ask_language():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-async def handle_language_selection(update: Update, context: ContextTypes.DEFAULT_TYPE, *, show_main_menu_fn):
+
+async def handle_language_selection(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, *, show_main_menu_fn
+):
     query = update.callback_query
     await query.answer()
     lang = query.data.split("_")[1]
