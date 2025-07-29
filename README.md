@@ -22,6 +22,18 @@
 ```bash
 export BOT_TOKEN="Ваш_Telegram_токен"
 ```
+Для пользователей Windows токен можно задать так же. В PowerShell выполните:
+
+```powershell
+$env:BOT_TOKEN = "Ваш_Telegram_токен"
+```
+
+В командной строке (cmd) используйте:
+
+```cmd
+set BOT_TOKEN=Ваш_Telegram_токен
+```
+
 
 Список контактов службы поддержки оставьте в файле `config.py`.
 
