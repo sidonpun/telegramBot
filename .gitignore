@@ -55,10 +55,6 @@ coverage.xml
 # celery beat schedule file
 celerybeat-schedule
 
-# dotenv
-.env
-.env.*
-
 # virtualenv
 venv/
 ENV/
@@ -107,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
 .env.bak
 .env.local
 
