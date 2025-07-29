@@ -36,5 +36,22 @@ games = {
             "30": "https://www.digiseller.market/asp2/pay_wm.asp?id_d=2774559&lang=ru-RU"
         },
         "durations": ["1", "15", "30"]
+    },
+    "spoofer": {
+        "title": "HWID Spoofer",
+        "description": {
+            "en": "🔒 Spoofs hardware IDs to bypass bans.",
+            "ru": "🔒 Подменяет HWID для обхода банов.",
+            "zh": "🔒 伪装硬件ID以绕过封禁。",
+            "ko": "🔒 HWID를 변경해 차단을 우회합니다.",
+            "tr": "🔒 Donanım kimliğini sahteleyerek banları aşar.",
+            "ja": "🔒 HWID を変更してBANを回避します。"
+        },
+        "guide": "https://docs.google.com/document/d/1TSe5plI4SNbHSsmscvvwxCaJ-QOzE42jcYchOo4jO7I/edit?tab=t.0#heading=h.ijrhw6dpoj89",
+        "links": {
+            "7": "https://www.digiseller.market/asp2/pay_wm.asp?id_d=3077144&lang=ru-RU",
+            "30": "https://www.digiseller.market/asp2/pay_wm.asp?id_d=3077145&lang=ru-RU"
+        },
+        "durations": ["7", "30"]
     }
 }
