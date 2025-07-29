@@ -45,3 +45,9 @@ def test_tarkov_in_games():
     assert 'tarkov' in main.games
     game = main.games['tarkov']
     assert game['durations'] == ['1', '15', '30']
+
+
+def test_spoofer_in_games():
+    assert 'spoofer' in main.games
+    game = main.games['spoofer']
+    assert game['durations'] == ['7', '30']
