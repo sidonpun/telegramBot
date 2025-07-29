@@ -46,8 +46,6 @@ async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = get_lang(uid)
     if query.data == "menu_choose_game":
         await show_games(query.message, uid)
-    elif query.data == "download_loader":
-        await send_loader_info(query.message, lang)
 
 async def game_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -85,8 +83,11 @@ async def guide_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = f"{translations['menu_instruction'][lang]}\n{url}"
     await query.edit_message_text(text, parse_mode="Markdown", reply_markup=back_to_main_button(lang))
 
-async def send_loader_info(message, lang):
-    await message.reply_text(
+async def send_loader_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    lang = get_lang(query.from_user.id)
+    await query.message.reply_text(
         translations["loader_password"][lang].format(url=LOADER_URL),
         parse_mode="Markdown",
     )
