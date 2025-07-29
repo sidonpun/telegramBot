@@ -21,6 +21,11 @@ LOADER_URL = "http://desync.pro:5000/home/download_packed"
 
 user_game_selection = {}
 
+
+def escape_markdown(text: str) -> str:
+    """Escape characters that have special meaning in Markdown."""
+    return text.replace("_", "\\_")
+
 def get_lang(user_id):
     return user_languages.get(user_id, "en")
 
@@ -277,7 +282,8 @@ async def support_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     lang = get_lang(query.from_user.id)
-    support_text = "💬 *Support contacts:*\n" + "\n".join(f"• {name}" for name in SUPPORT_CONTACTS)
+    contacts = "\n".join(f"• {escape_markdown(name)}" for name in SUPPORT_CONTACTS)
+    support_text = "💬 *Support contacts:*\n" + contacts
     await query.edit_message_text(support_text, parse_mode="Markdown", reply_markup=back_to_main_button(lang))
 
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
