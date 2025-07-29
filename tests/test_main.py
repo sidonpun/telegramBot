@@ -39,3 +39,9 @@ def test_loader_password_contains_url():
     for lang in ('en', 'ru', 'zh', 'ko', 'tr', 'ja'):
         text = main.translations['loader_password'][lang].format(url=main.LOADER_URL)
         assert main.LOADER_URL in text
+
+
+def test_tarkov_in_games():
+    assert 'tarkov' in main.games
+    game = main.games['tarkov']
+    assert game['durations'] == ['1', '15', '30']
