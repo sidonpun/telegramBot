@@ -17,18 +17,13 @@
 
 ## Настройка `BOT_TOKEN`
 
-В файле `config.py` находится переменная `BOT_TOKEN`. Замените её значение на токен вашего бота, полученный у [BotFather](https://t.me/BotFather). Пример содержимого файла:
+Перед запуском необходимо задать переменную окружения `BOT_TOKEN` со значением токена вашего бота, полученным у [BotFather](https://t.me/BotFather). Пример для Linux/macOS:
 
-```python
-# config.py
-BOT_TOKEN = "Ваш_Telegram_токен"
-
-SUPPORT_CONTACTS = [
-    "@white_listed",
-    "@blacklist3d3",
-    "@Desync_tech",
-]
+```bash
+export BOT_TOKEN="Ваш_Telegram_токен"
 ```
+
+Список контактов службы поддержки оставьте в файле `config.py`.
 
 ## Запуск
 
