@@ -55,11 +55,23 @@ def build_main_menu_keyboard(lang: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+def _ensure_job_queue(context: ContextTypes.DEFAULT_TYPE):
+    """Return a working job queue or raise a helpful error."""
+    job_queue = getattr(context, "job_queue", None)
+    if job_queue is None:
+        raise RuntimeError(
+            "JobQueue is required for inactivity tracking. "
+            'Install extras via `pip install "python-telegram-bot[job-queue]"`.'
+        )
+    return job_queue
+
+
 def reset_inactivity_timer(context: ContextTypes.DEFAULT_TYPE, chat_id: int, user_id: int, lang: str) -> None:
     job = inactivity_jobs.pop(user_id, None)
     if job:
         job.schedule_removal()
-    inactivity_jobs[user_id] = context.job_queue.run_once(
+    job_queue = _ensure_job_queue(context)
+    inactivity_jobs[user_id] = job_queue.run_once(
         handle_inactivity,
         INACTIVITY_SECONDS,
         chat_id=chat_id,
