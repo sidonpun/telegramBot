@@ -10,7 +10,8 @@
    git clone <URL>
    cd telegramBot
    ```
-3. Установите необходимые библиотеки из `requirements.txt`:
+3. Установите необходимые библиотеки из `requirements.txt`.
+   В их числе `python-telegram-bot` с поддержкой `JobQueue`:
    ```bash
    pip install -r requirements.txt
    ```
