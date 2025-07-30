@@ -1,9 +1,8 @@
 import os
+from functools import partial, wraps
+
 from dotenv import load_dotenv
-
-load_dotenv()
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -12,14 +11,20 @@ from telegram.ext import (
 )
 
 from config import SUPPORT_CONTACTS
-from translations import translations
 from games import games
 from language import ask_language, handle_language_selection, user_languages
-from functools import partial
+from translations import translations
+
+load_dotenv()
 
 LOADER_URL = "http://desync.pro:5000/home/download_packed"
 
-user_game_selection = {}
+# After each user interaction we will return to the main menu if there is no
+# activity for this amount of seconds. Initially 30 seconds for testing.
+INACTIVITY_SECONDS = 30
+
+user_game_selection: dict[int, str] = {}
+inactivity_jobs: dict[int, object] = {}
 
 
 def escape_markdown(text: str) -> str:
@@ -36,10 +41,8 @@ def duration_label(days: str, lang: str) -> str:
 def get_lang(user_id):
     return user_languages.get(user_id, "en")
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(translations["start"]["en"], reply_markup=ask_language())
 
-async def show_main_menu(target, lang):
+def build_main_menu_keyboard(lang: str) -> InlineKeyboardMarkup:
     keyboard = [
         [InlineKeyboardButton(translations["menu_website"][lang], url="https://desync.pro/")],
         [InlineKeyboardButton(translations["menu_game"][lang], callback_data="menu_choose_game")],
@@ -47,10 +50,59 @@ async def show_main_menu(target, lang):
         [InlineKeyboardButton(translations["menu_status"][lang], url="https://desync.pro/statuses")],
         [InlineKeyboardButton(translations["menu_faq"][lang], callback_data="faq")],
         [InlineKeyboardButton(translations["menu_support"][lang], callback_data="support")],
-        [InlineKeyboardButton(translations["menu_language"][lang], callback_data="change_language")]
+        [InlineKeyboardButton(translations["menu_language"][lang], callback_data="change_language")],
     ]
-    await target.reply_text(translations["menu_title"][lang], reply_markup=InlineKeyboardMarkup(keyboard))
+    return InlineKeyboardMarkup(keyboard)
 
+
+def reset_inactivity_timer(context: ContextTypes.DEFAULT_TYPE, chat_id: int, user_id: int, lang: str) -> None:
+    job = inactivity_jobs.pop(user_id, None)
+    if job:
+        job.schedule_removal()
+    inactivity_jobs[user_id] = context.job_queue.run_once(
+        handle_inactivity,
+        INACTIVITY_SECONDS,
+        chat_id=chat_id,
+        data={"user_id": user_id, "lang": lang},
+        name=f"inactivity_{user_id}",
+    )
+
+
+async def handle_inactivity(context: ContextTypes.DEFAULT_TYPE) -> None:
+    data = context.job.data
+    lang = data["lang"]
+    await context.bot.send_message(
+        context.job.chat_id,
+        translations["session_timeout"][lang],
+        reply_markup=build_main_menu_keyboard(lang),
+    )
+    inactivity_jobs.pop(data["user_id"], None)
+
+
+def track_activity(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        result = await func(update, context, *args, **kwargs)
+        user = update.effective_user
+        chat = update.effective_chat
+        if user and chat:
+            lang = get_lang(user.id)
+            reset_inactivity_timer(context, chat.id, user.id, lang)
+        return result
+
+    return wrapper
+
+@track_activity
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(translations["start"]["en"], reply_markup=ask_language())
+
+async def show_main_menu(target, lang):
+    await target.reply_text(
+        translations["menu_title"][lang],
+        reply_markup=build_main_menu_keyboard(lang),
+    )
+
+@track_activity
 async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -59,6 +111,7 @@ async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "menu_choose_game":
         await show_games(query.message, uid)
 
+@track_activity
 async def game_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -75,6 +128,7 @@ async def game_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard.append([InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")])
     await query.edit_message_text(translations["choose_subscription"][lang], reply_markup=InlineKeyboardMarkup(keyboard))
 
+@track_activity
 async def subscription_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -88,6 +142,7 @@ async def subscription_selected(update: Update, context: ContextTypes.DEFAULT_TY
     )
     await query.edit_message_text(text, parse_mode="Markdown", disable_web_page_preview=True, reply_markup=back_to_main_button(lang))
 
+@track_activity
 async def guide_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -98,6 +153,7 @@ async def guide_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = f"{translations['menu_instruction'][lang]}\n{escape_markdown(url)}"
     await query.edit_message_text(text, parse_mode="Markdown", reply_markup=back_to_main_button(lang))
 
+@track_activity
 async def send_loader_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -107,6 +163,7 @@ async def send_loader_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
     )
 
+@track_activity
 async def show_faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -245,6 +302,7 @@ async def show_faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard.append([InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")])
     await query.edit_message_text("❓ " + translations["menu_faq"][lang], reply_markup=InlineKeyboardMarkup(keyboard))
 
+@track_activity
 async def send_faq_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -273,6 +331,7 @@ async def send_faq_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await query.edit_message_text("❌ Вопрос не найден.", reply_markup=back_to_main_button(lang))
 
+@track_activity
 async def back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -288,6 +347,7 @@ async def show_games(message, user_id):
     keyboard.append([InlineKeyboardButton(translations["back"][lang], callback_data="back_to_main")])
     await message.reply_text(translations["choose_game"][lang], reply_markup=InlineKeyboardMarkup(keyboard))
 
+@track_activity
 async def support_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -296,6 +356,7 @@ async def support_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     support_text = "💬 *Support contacts:*\n" + contacts
     await query.edit_message_text(support_text, parse_mode="Markdown", reply_markup=back_to_main_button(lang))
 
+@track_activity
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()

@@ -56,3 +56,11 @@ def test_spoofer_in_games():
 def test_duration_label_russian():
     assert main.duration_label('1', 'ru') == '1 день'
     assert main.duration_label('7', 'ru') == '7 дней'
+
+def test_session_timeout_translations_exist():
+    assert 'session_timeout' in main.translations
+    for lang in ('en', 'ru', 'zh', 'ko', 'tr', 'ja'):
+        assert lang in main.translations['session_timeout']
+
+def test_inactivity_seconds_default():
+    assert main.INACTIVITY_SECONDS == 30
