@@ -23,6 +23,11 @@ LOADER_URL = "http://desync.pro:5000/home/download_packed"
 # activity for this amount of seconds. Initially 30 seconds for testing.
 INACTIVITY_SECONDS = 30
 
+JOBQUEUE_ERROR = (
+    "JobQueue is required for inactivity tracking. "
+    'Install extras via `pip install "python-telegram-bot[job-queue]"`.'
+)
+
 user_game_selection: dict[int, str] = {}
 inactivity_jobs: dict[int, object] = {}
 
@@ -59,10 +64,7 @@ def _ensure_job_queue(context: ContextTypes.DEFAULT_TYPE):
     """Return a working job queue or raise a helpful error."""
     job_queue = getattr(context, "job_queue", None)
     if job_queue is None:
-        raise RuntimeError(
-            "JobQueue is required for inactivity tracking. "
-            'Install extras via `pip install "python-telegram-bot[job-queue]"`.'
-        )
+        raise RuntimeError(JOBQUEUE_ERROR)
     return job_queue
 
 
@@ -380,6 +382,8 @@ def main():
         raise RuntimeError("BOT_TOKEN environment variable is not set")
 
     app = Application.builder().token(token).build()
+    if app.job_queue is None:
+        raise RuntimeError(JOBQUEUE_ERROR)
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CallbackQueryHandler(partial(handle_language_selection, show_main_menu_fn=show_main_menu), pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(menu_handler, pattern="^menu_"))
