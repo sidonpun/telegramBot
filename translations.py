@@ -172,8 +172,16 @@ translations = {
         "en": "🔒 Archive password: 123\n⬇️ [Download loader]({url})",
         "ru": "🔒 Пароль к архиву: 123\n⬇️ [Скачать лоадер]({url})",
         "zh": "🔒 存档密码: 123\n⬇️ [下载加载器]({url})",
-        "ko": "🔒 압축 파일 암호: 123\n⬇️ [로더 다운로드]({url})",
+        "ko": "🔒 압축 파일 암호: 123\n⬇️ [ローダー 다운로드]({url})",
         "tr": "🔒 Arşiv parolası: 123\n⬇️ [Yükleyiciyi indir]({url})",
         "ja": "🔒 アーカイブのパスワード: 123\n⬇️ [ローダーをダウンロード]({url})"
+    },
+    "session_timeout": {
+        "en": "🙏 Thank you for contacting us. Returning to the main menu.",
+        "ru": "🙏 Спасибо за обращение. Возвращаемся в главное меню.",
+        "zh": "🙏 感谢你的咨询。返回主菜单。",
+        "ko": "🙏 문의해 주셔서 감사합니다. 메인 메뉴로 돌아갑니다.",
+        "tr": "🙏 İletişime geçtiğiniz için teşekkürler. Ana menüye dönülüyor.",
+        "ja": "🙏 お問い合わせありがとうございます。メインメニューに戻ります。"
     }
 }
