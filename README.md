@@ -16,6 +16,13 @@
    pip install -r requirements.txt
    ```
 
+   Если при запуске вы увидите сообщение об отсутствии `JobQueue`,
+   установите библиотеку с дополнительными возможностями:
+
+   ```bash
+   pip install "python-telegram-bot[job-queue]"
+   ```
+
 ## Настройка `BOT_TOKEN`
 
 Перед запуском необходимо указать токен бота `BOT_TOKEN`, полученный у [BotFather](https://t.me/BotFather).
