@@ -4,7 +4,7 @@ from functools import partial
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
-    Application,
+    ApplicationBuilder,
     CallbackQueryHandler,
     CommandHandler,
     ContextTypes,
@@ -317,7 +317,7 @@ def main():
     if not token:
         raise RuntimeError("BOT_TOKEN environment variable is not set")
 
-    app = Application.builder().token(token).build()
+    app = ApplicationBuilder().token(token).build()
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CallbackQueryHandler(partial(handle_language_selection, show_main_menu_fn=show_main_menu), pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(menu_handler, pattern="^menu_"))
