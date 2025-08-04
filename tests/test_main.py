@@ -15,7 +15,7 @@ telegram.InlineKeyboardMarkup = object
 telegram.Update = object
 
 telegram_ext = types.ModuleType('telegram.ext')
-telegram_ext.Application = object
+telegram_ext.ApplicationBuilder = object
 telegram_ext.CommandHandler = object
 telegram_ext.CallbackQueryHandler = object
 telegram_ext.ContextTypes = types.SimpleNamespace(DEFAULT_TYPE=object)
